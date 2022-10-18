@@ -1,0 +1,185 @@
+Image Augmentation
+
+import tensorflow
+from tensorflow.keras.preprocessing.image import ImageDataGenerator
+train_datagen = ImageDataGenerator(rescale=1./255,zoom_range=0.2,horizontal_flip=True,vertical_flip=True)
+test_datagen = ImageDataGenerator(rescale=1./255)
+xtrain = train_datagen.flow_from_directory('Flowers-Dataset/flowers',target_size=(64,64),class_mode='categorical',batch_size=100)
+Found 4317 images belonging to 5 classes.
+xtest = test_datagen.flow_from_directory('Flowers-Dataset/flowers',target_size=(64,64),class_mode='categorical',batch_size=100)
+Found 4317 images belonging to 5 classes.
+Create model
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Convolution2D,MaxPooling2D,Flatten,Dense
+model = Sequential()
+Convolution layer
+
+model.add(Convolution2D(32,(3,3),activation='relu',input_shape=(64,64,3)))
+Maxpooling
+
+model.add(MaxPooling2D(pool_size=(2,2)))
+Flatten
+
+model.add(Flatten())
+Dense layer
+
+model.add(Dense(300,activation='relu')) #hiddenlayer 1
+model.add(Dense(300,activation='relu')) #hiddenlayer 2
+model.add(Dense(150,activation='relu')) #hiddenlayer 3
+Output layer
+
+model.add(Dense(5,activation='softmax'))
+Compile the model
+
+model.compile(optimizer='adam',loss='categorical_crossentropy',metrics=['accuracy'])
+model.fit_generator(xtrain,
+                    steps_per_epoch=len(xtrain),
+                    epochs=10,                
+                    validation_data=xtest,
+                    validation_steps=len(xtest))
+C:\Users\ramvi\AppData\Local\Temp\ipykernel_24544\2033910576.py:1: UserWarning: `Model.fit_generator` is deprecated and will be removed in a future version. Please use `Model.fit`, which supports generators.
+  model.fit_generator(xtrain,
+Epoch 1/10
+44/44 [==============================] - 24s 529ms/step - loss: 1.4021 - accuracy: 0.3919 - val_loss: 1.1613 - val_accuracy: 0.5244
+Epoch 2/10
+44/44 [==============================] - 22s 495ms/step - loss: 1.1267 - accuracy: 0.5413 - val_loss: 1.0386 - val_accuracy: 0.5868
+Epoch 3/10
+44/44 [==============================] - 22s 500ms/step - loss: 1.0428 - accuracy: 0.5874 - val_loss: 0.9826 - val_accuracy: 0.6139
+Epoch 4/10
+44/44 [==============================] - 23s 536ms/step - loss: 0.9886 - accuracy: 0.6034 - val_loss: 0.9795 - val_accuracy: 0.6120
+Epoch 5/10
+44/44 [==============================] - 22s 502ms/step - loss: 0.9264 - accuracy: 0.6361 - val_loss: 0.9692 - val_accuracy: 0.6194
+Epoch 6/10
+44/44 [==============================] - 23s 529ms/step - loss: 0.9095 - accuracy: 0.6430 - val_loss: 0.8782 - val_accuracy: 0.6525
+Epoch 7/10
+44/44 [==============================] - 22s 501ms/step - loss: 0.8741 - accuracy: 0.6599 - val_loss: 0.8575 - val_accuracy: 0.6732
+Epoch 8/10
+44/44 [==============================] - 21s 475ms/step - loss: 0.8412 - accuracy: 0.6759 - val_loss: 0.9764 - val_accuracy: 0.6359
+Epoch 9/10
+44/44 [==============================] - 21s 481ms/step - loss: 0.8153 - accuracy: 0.6926 - val_loss: 0.8917 - val_accuracy: 0.6349
+Epoch 10/10
+44/44 [==============================] - 21s 490ms/step - loss: 0.7929 - accuracy: 0.6991 - val_loss: 0.7804 - val_accuracy: 0.7060
+<keras.callbacks.History at 0x181b2370430>
+Saving
+
+model.save('Flowers.h5')
+Testing the model
+
+import numpy as np
+from tensorflow.keras.preprocessing import image
+img = image.load_img('Flowers-Dataset/flower.jpg',target_size=(64,64))
+img
+
+x = image.img_to_array(img)
+x
+array([[[ 7., 14.,  6.],
+        [12., 24., 12.],
+        [12., 24., 12.],
+        ...,
+        [29., 62.,  7.],
+        [28., 60., 10.],
+        [26., 53., 10.]],
+
+       [[ 8., 18.,  7.],
+        [20., 33., 16.],
+        [12., 25.,  8.],
+        ...,
+        [32., 61., 13.],
+        [21., 47.,  2.],
+        [28., 51.,  9.]],
+
+       [[18., 30., 16.],
+        [17., 32., 11.],
+        [11., 23.,  9.],
+        ...,
+        [27., 64., 20.],
+        [26., 52., 15.],
+        [21., 43.,  7.]],
+
+       ...,
+
+       [[26., 62., 16.],
+        [25., 63., 24.],
+        [33., 69., 33.],
+        ...,
+        [25., 51., 16.],
+        [20., 39., 11.],
+        [12., 20.,  7.]],
+
+       [[26., 61., 21.],
+        [32., 64., 27.],
+        [30., 63., 32.],
+        ...,
+        [22., 53., 19.],
+        [18., 38., 13.],
+        [ 8., 15.,  7.]],
+
+       [[27., 54., 23.],
+        [23., 52., 21.],
+        [32., 60., 37.],
+        ...,
+        [22., 56., 21.],
+        [16., 35., 13.],
+        [ 7., 14.,  6.]]], dtype=float32)
+x = np.expand_dims(x,axis=0)
+x
+array([[[[ 7., 14.,  6.],
+         [12., 24., 12.],
+         [12., 24., 12.],
+         ...,
+         [29., 62.,  7.],
+         [28., 60., 10.],
+         [26., 53., 10.]],
+
+        [[ 8., 18.,  7.],
+         [20., 33., 16.],
+         [12., 25.,  8.],
+         ...,
+         [32., 61., 13.],
+         [21., 47.,  2.],
+         [28., 51.,  9.]],
+
+        [[18., 30., 16.],
+         [17., 32., 11.],
+         [11., 23.,  9.],
+         ...,
+         [27., 64., 20.],
+         [26., 52., 15.],
+         [21., 43.,  7.]],
+
+        ...,
+
+        [[26., 62., 16.],
+         [25., 63., 24.],
+         [33., 69., 33.],
+         ...,
+         [25., 51., 16.],
+         [20., 39., 11.],
+         [12., 20.,  7.]],
+
+        [[26., 61., 21.],
+         [32., 64., 27.],
+         [30., 63., 32.],
+         ...,
+         [22., 53., 19.],
+         [18., 38., 13.],
+         [ 8., 15.,  7.]],
+
+        [[27., 54., 23.],
+         [23., 52., 21.],
+         [32., 60., 37.],
+         ...,
+         [22., 56., 21.],
+         [16., 35., 13.],
+         [ 7., 14.,  6.]]]], dtype=float32)
+model.predict(x)
+1/1 [==============================] - 2s 2s/step
+array([[0., 0., 1., 0., 0.]], dtype=float32)
+xtrain.class_indices
+{'daisy': 0, 'dandelion': 1, 'rose': 2, 'sunflower': 3, 'tulip': 4}
+op = ['daisy','dandelion','rose','sunflower','tulip']
+pred = np.argmax(model.predict(x))
+op[pred]
+1/1 [==============================] - 0s 18ms/step
+'rose'
